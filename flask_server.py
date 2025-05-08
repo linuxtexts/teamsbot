@@ -43,4 +43,4 @@ def messages():
         return Response(status=200)
     except Exception as e:
         print(f"❌ Ошибка: {e}")
-        return Response(f"Error: {e}", status=500)
+        return Response("Error: {}".format(e), status=500)
