@@ -3,3 +3,7 @@ static
 frontend
 faiss-cpu
 sentence_transformers
+
+📌 Шаг 2: Принудительно откатить до совместимых версий
+	pip install sentence-transformers==2.2.2 transformers==4.34.0
+
