@@ -1,5 +1,3 @@
-# teamsbot
-salple
 
 # Connect bot to Azure
 ✅ Steps to allow sideloading (custom app installation) only for yourself in Microsoft Teams Admin Center
