@@ -1,0 +1,5 @@
+faiss
+static
+frontend
+faiss-cpu
+sentence_transformers
