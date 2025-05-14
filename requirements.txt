@@ -1,12 +1,6 @@
-faiss
-static
-frontend
-faiss-cpu
-sentence_transformers
-python-docx
-tools
-fitz
-docx
+python3 -m venv ~/myenv
+source ~/myenv/bin/activate
+pip install faiss static frontend faiss-cpu sentence_transformers python-docx tools fitz docx
 
 📌 Шаг 2: Принудительно откатить до совместимых версий
 	pip install sentence-transformers==2.2.2 transformers==4.34.0
