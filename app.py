@@ -3,6 +3,7 @@ from botbuilder.schema import ActivityTypes, Attachment, Activity
 import os
 import json
 import datetime
+from rapidfuzz import fuzz
 
 # ✅ Глобальные переменные для инструкций и времени последней загрузки
 INSTRUCTIONS = {}
@@ -38,6 +39,25 @@ def load_instructions(directory="instructions"):
     LAST_LOADED = datetime.datetime.now()
     print(f"[✅ Инструкции перезагружены в {LAST_LOADED}]")
 
+# ✅ Fuzzy-поиск по инструкциям
+def search_instructions_fuzzy(query, threshold=55):
+    results = []
+    query_lower = query.lower()
+    for key, data in INSTRUCTIONS.items():
+        combined_text = key
+        if "title" in data:
+            combined_text += " " + data["title"]
+        if "steps" in data:
+            combined_text += " " + " ".join(data["steps"])
+
+        score = fuzz.partial_ratio(query_lower, combined_text.lower())
+        if score >= threshold:
+            results.append((score, key, data))
+
+    # Сортируем по степени схожести (лучшие сверху)
+    results.sort(reverse=True)
+    return results
+
 # ✅ Инициализация инструкций при запуске
 load_instructions()
 
@@ -65,7 +85,42 @@ class ITSupportBot(ActivityHandler):
         if text in INSTRUCTIONS:
             await self._send_instruction_adaptive(turn_context, text)
         else:
-            await self._send_main_menu_adaptive(turn_context)
+            # 🔍 Fuzzy-поиск
+            search_results = search_instructions_fuzzy(text)
+            if search_results:
+                buttons = []
+                for score, key, instr in search_results[:5]:  # Топ 5 результатов
+                    buttons.append({
+                        "type": "Action.Submit",
+                        "title": f"{instr.get('title', key.title())} ({score}%)",
+                        "data": {"msteams": {"type": "messageBack", "text": key}}
+                    })
+
+                card_json = {
+                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                    "type": "AdaptiveCard",
+                    "version": "1.4",
+                    "body": [
+                        {
+                            "type": "TextBlock",
+                            "text": f"🔍 Gefunden für '{text}':",
+                            "weight": "Bolder",
+                            "size": "Medium",
+                            "wrap": True
+                        }
+                    ],
+                    "actions": buttons
+                }
+
+                await turn_context.send_activity(Activity(
+                    type=ActivityTypes.message,
+                    attachments=[Attachment(
+                        content_type="application/vnd.microsoft.card.adaptive",
+                        content=card_json
+                    )]
+                ))
+            else:
+                await turn_context.send_activity(f"❓ Keine Ergebnisse für '{text}'. Bitte versuchen Sie es anders oder tippen Sie 'menu'.")
 
     async def on_members_added_activity(self, members_added, turn_context: TurnContext):
         for member in members_added:
@@ -167,4 +222,3 @@ class ITSupportBot(ActivityHandler):
                 content=card_json
             )]
         ))
-
