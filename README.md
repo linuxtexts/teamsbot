@@ -6,7 +6,7 @@ salple
 ## 1. Go to Microsoft Teams Admin Center
 https://admin.teams.microsoft.com
 
-##2. Check organization-wide settings for custom app uploads
+## 2. Check organization-wide settings for custom app uploads
 Navigate to:
 `Teams apps → Manage apps`
 
